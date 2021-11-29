@@ -44,6 +44,21 @@ public class MappingController {
 		}
 	}
 
+	@PostMapping(value = "/maptordf",
+				consumes = {"application/json"},
+				produces = {"application/n-triples"})
+	public ResponseEntity<?> mapJsonToNTriples(@RequestParam final String mappingFile,
+						@RequestBody final String input) throws IOException {
+		try {
+			Model result = mappingService.jsonToRdf(input, mappingFile);
+			OutputStream turtleOutput = modelToRdf(result, RDFFormat.NTRIPLES);
+			return new ResponseEntity<>(turtleOutput.toString(), HttpStatus.OK);
+		} catch (Exception ex) {
+			LOG.error("Error processing input: " + ex.toString());
+			return new ResponseEntity<>("Invalid input: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+
 	@PostMapping(value = "/maptordf", consumes = {"text/xml"})
 	public ResponseEntity<?> mapXmlToRdf(@RequestParam final String mappingFile,
 						@RequestBody final String input) throws IOException {
