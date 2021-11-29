@@ -29,12 +29,29 @@ public class MappingController {
 	@Autowired
 	private RmlMappingService mappingService;
 
-	@PostMapping(value = "/maptordf", consumes = {"application/json"})
-	public ResponseEntity<?> mapJsonToRdf(@RequestParam final String mappingFile,
+	@PostMapping(value = "/maptordf",
+				consumes = {"application/json"},
+				produces = {"text/turtle"})
+	public ResponseEntity<?> mapJsonToTurtle(@RequestParam final String mappingFile,
 						@RequestBody final String input) throws IOException {
 		try {
 			Model result = mappingService.jsonToRdf(input, mappingFile);
-			OutputStream turtleOutput = modelToTtl(result);
+			OutputStream turtleOutput = modelToRdf(result, RDFFormat.TURTLE);
+			return new ResponseEntity<>(turtleOutput.toString(), HttpStatus.OK);
+		} catch (Exception ex) {
+			LOG.error("Error processing input: " + ex.toString());
+			return new ResponseEntity<>("Invalid input: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@PostMapping(value = "/maptordf",
+				consumes = {"application/json"},
+				produces = {"application/n-triples"})
+	public ResponseEntity<?> mapJsonToNTriples(@RequestParam final String mappingFile,
+						@RequestBody final String input) throws IOException {
+		try {
+			Model result = mappingService.jsonToRdf(input, mappingFile);
+			OutputStream turtleOutput = modelToRdf(result, RDFFormat.NTRIPLES);
 			return new ResponseEntity<>(turtleOutput.toString(), HttpStatus.OK);
 		} catch (Exception ex) {
 			LOG.error("Error processing input: " + ex.toString());
@@ -47,7 +64,7 @@ public class MappingController {
 						@RequestBody final String input) throws IOException {
 		try {
 			Model result = mappingService.xmlToRdf(input, mappingFile);
-			OutputStream turtleOutput = modelToTtl(result);
+			OutputStream turtleOutput = modelToRdf(result, RDFFormat.TURTLE);
 			return new ResponseEntity<>(turtleOutput.toString(), HttpStatus.OK);
 		} catch (Exception ex) {
 			LOG.error("Error processing input: " + ex.toString());
@@ -55,9 +72,10 @@ public class MappingController {
 		}
 	}
 
-	private OutputStream modelToTtl(final Model result) throws UnsupportedRDFormatException, RDFHandlerException {
+	private OutputStream modelToRdf(final Model result, final RDFFormat format)
+			throws UnsupportedRDFormatException, RDFHandlerException {
 		OutputStream turtleOutput = new ByteArrayOutputStream();
-		RDFWriter rdfWriter = Rio.createWriter(RDFFormat.TURTLE,
+		RDFWriter rdfWriter = Rio.createWriter(format,
 			turtleOutput);
 		rdfWriter.startRDF();
 		for (Statement st: result) {
