@@ -130,6 +130,12 @@
 	  <version>4.4.11</version>
 	  <type>jar</type>
 	 </dependency>
+	 <dependency>
+	  <groupId>org.projectlombok</groupId>
+	  <artifactId>lombok</artifactId>
+	  <version>1.18.22</version>
+	  <type>jar</type>
+	 </dependency>
 	</dependencies>
 	<build>
 		<plugins>
