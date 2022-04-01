@@ -26,7 +26,7 @@ public class MappingFileProvider {
 
 	@GetMapping(value = "/mappingfile", produces = {"text/turtle"})
 	public ResponseEntity<?> getMappingFile(@RequestParam final String filename) {
-		File mappingFile = new File(getMappingFileDir().concat(filename));
+		File mappingFile = new File(getDir("/mappingFile/").concat(filename));
 		try (InputStream mappingStream = new FileInputStream(mappingFile)) {
 			return new ResponseEntity<>(IOUtils.toString(mappingStream), HttpStatus.OK);
 		} catch (FileNotFoundException ex) {
@@ -45,6 +45,11 @@ public class MappingFileProvider {
 			if (!Files.exists(Paths.get(getMappingFileDir()))) {
 				return new ResponseEntity<>("Could not create mapping file folder",
 								HttpStatus.INTERNAL_SERVER_ERROR);
+	private String getDir(final String directory) {
+		String workingDirPath = System.getProperty("user.dir");
+		String targetDirPath = workingDirPath.concat(directory);
+		return targetDirPath;
+	}
 			}
 		}
 		try (OutputStream outStream = new FileOutputStream(mappingFile)) {
@@ -58,11 +63,5 @@ public class MappingFileProvider {
 			return new ResponseEntity<>("Error opening file: " + ex.getMessage(),
 							HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-	}
-
-	private String getMappingFileDir() {
-		String workingDirPath = System.getProperty("user.dir");
-		String targetDirPath = workingDirPath.concat("/mappingfiles/");
-		return targetDirPath;
 	}
 }
