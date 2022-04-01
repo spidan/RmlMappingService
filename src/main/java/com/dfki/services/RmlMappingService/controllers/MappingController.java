@@ -1,6 +1,7 @@
 package com.dfki.services.RmlMappingService.controllers;
 
 import com.dfki.services.RmlMappingService.service.RmlMappingService;
+import com.dfki.services.RmlMappingService.service.ShaclValidator;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,10 +49,17 @@ public class MappingController {
 				consumes = {"application/json"},
 				produces = {"application/n-triples"})
 	public ResponseEntity<?> mapJsonToNTriples(@RequestParam final String mappingFile,
-						@RequestBody final String input) throws IOException {
+						@RequestBody final String input,
+						@RequestParam(required = false) final String shaclShape)
+						throws IOException {
 		try {
 			Model result = mappingService.jsonToRdf(input, mappingFile);
 			OutputStream turtleOutput = modelToRdf(result, RDFFormat.NTRIPLES);
+			if (shaclShape != null) {
+				if (!ShaclValidator.validateMappingResult(turtleOutput.toString(), shaclShape)) {
+					return new ResponseEntity<>("You fucked up your mapping", HttpStatus.BAD_REQUEST);
+				}
+			}
 			return new ResponseEntity<>(turtleOutput.toString(), HttpStatus.OK);
 		} catch (Exception ex) {
 			LOG.error("Error processing input: " + ex.toString());
