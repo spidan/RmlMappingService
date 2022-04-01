@@ -40,19 +40,25 @@ public class MappingFileProvider {
 	@PostMapping(value = "/mappingfile", consumes = {"text/turtle"})
 	public ResponseEntity<?> postMappingFile(@RequestBody final String mapping,
 						@RequestParam final String filename) {
-		File mappingFile = new File(getMappingFileDir().concat(filename));
-		if (!mappingFile.getParentFile().mkdirs()) {
-			if (!Files.exists(Paths.get(getMappingFileDir()))) {
-				return new ResponseEntity<>("Could not create mapping file folder",
-								HttpStatus.INTERNAL_SERVER_ERROR);
+		String directoryName = "/mappingfiles/";
+		return wirteToDirectory(directoryName, filename, mapping);
+	}
+
 	private String getDir(final String directory) {
 		String workingDirPath = System.getProperty("user.dir");
 		String targetDirPath = workingDirPath.concat(directory);
 		return targetDirPath;
 	}
+
+	private ResponseEntity<?> wirteToDirectory(final String directoryName, final String filename, final String mapping) {
+		File file = new File(getDir(directoryName).concat(filename));
+		if (!file.getParentFile().mkdirs()) {
+			if (!Files.exists(Paths.get(getDir(directoryName)))) {
+				return new ResponseEntity<>("Could not create folder " + directoryName,
+						HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
-		try (OutputStream outStream = new FileOutputStream(mappingFile)) {
+		try (OutputStream outStream = new FileOutputStream(file)) {
 			outStream.write(mapping.getBytes("utf-8"));
 			return new ResponseEntity<>("Worked", HttpStatus.OK);
 		} catch (FileNotFoundException ex) {
