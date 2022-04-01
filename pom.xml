@@ -118,6 +118,11 @@
 			<artifactId>carml-logical-source-resolver-xpath</artifactId>
 			<version>0.2.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.topbraid</groupId>
+			<artifactId>shacl</artifactId>
+			<version>1.0.1</version>
+		</dependency>
 	 <dependency>
 	  <groupId>org.apache.httpcomponents</groupId>
 	  <artifactId>httpclient</artifactId>
