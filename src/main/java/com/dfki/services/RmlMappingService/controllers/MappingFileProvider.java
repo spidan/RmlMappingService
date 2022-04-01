@@ -44,6 +44,13 @@ public class MappingFileProvider {
 		return wirteToDirectory(directoryName, filename, mapping);
 	}
 
+	@PostMapping(value = "/shapefile", consumes = {"text/turtle"})
+	public ResponseEntity<?> postTemplateFile(@RequestBody final String shape,
+				@RequestParam final String filename) {
+		String directoryName = "/shapeFiles/";
+		return wirteToDirectory(directoryName, filename, shape);
+	}
+
 	private String getDir(final String directory) {
 		String workingDirPath = System.getProperty("user.dir");
 		String targetDirPath = workingDirPath.concat(directory);
